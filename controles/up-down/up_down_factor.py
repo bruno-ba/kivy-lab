@@ -2,14 +2,7 @@
 
 import kivy
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-from kivy.properties import NumericProperty, BoundedNumericProperty, StringProperty
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from abc import ABC, abstractmethod
+from kivy.properties import NumericProperty
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivy.core.window import Window
