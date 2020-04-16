@@ -22,7 +22,7 @@ class UpDown(Widget):
     up_factor = NumericProperty(1)  # fator de subida
     down_factor = NumericProperty(-1)  # fator de descida
 
-    def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores
+    def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores up e down
         if direction:
             up_mo = UpDown.up_factor_regex.search(value)
 
