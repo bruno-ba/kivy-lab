@@ -1,4 +1,5 @@
 import kivy
+import re
 from kivy.app import App
 from kivy.properties import NumericProperty
 from kivy.lang import Builder
@@ -15,40 +16,39 @@ class UpDown(Widget):
     simples contador que adiciona um fator para incremento e outro fator para decremento, podendo ser alterado pelas
     caixas de texto
     """
+    down_factor_regex = re.compile(r'^(-)?([1-9])+0*$')  # aceita inteiros e com ou sem sinal negativo
+    up_factor_regex = re.compile(r'\d+')  # aceita inteiros
     current_value = NumericProperty(0)  # valor atual do contador
     up_factor = NumericProperty(1)  # fator de subida
     down_factor = NumericProperty(-1)  # fator de descida
 
     def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores
+        if direction:
+            up_mo = UpDown.up_factor_regex.search(value)
 
-        def safe_cast(val, to_type, default=None):
-            try:
-                return to_type(val)
+            if up_mo:
+                print(up_mo.group())
+                uf = int(up_mo.group())
+                self.up_factor = 0
+                self.up_factor = uf
 
-            except (ValueError, TypeError):
-                return default
 
-        factor = safe_cast(value, int, 0)
-
-        if factor == 0:
-            if direction:
+            else:
                 self.up_factor = 0
                 self.up_factor = 1
+
+        else:
+            down_mo = UpDown.down_factor_regex.search(value)
+
+            if down_mo:
+                print(down_mo.group())
+                df = int(down_mo.group())
+                self.down_factor = 0
+                self.down_factor = df if df < 0 else df * -1
 
             else:
                 self.down_factor = 0
                 self.down_factor = -1
-
-        else:
-            factor = abs(factor)
-
-            if direction:
-                self.up_factor = 0
-                self.up_factor = factor
-
-            else:
-                self.down_factor = 0
-                self.down_factor = factor * -1
 
     def increment_current_value(self, direction: bool) -> None:  # incrementa ou decrementa o valor corrente
         self.current_value += self.up_factor if direction else self.down_factor
@@ -64,7 +64,7 @@ code = """
     Button:
         text: str(root.factor)
         on_press: root.command_btn(root.command_arg)
-    TextInput:
+    TextInput:  
         size_hint_y: .5
         text: str(root.factor)
         input_filter: 'int'
