@@ -20,7 +20,15 @@ class UpDown(Widget):
     down_factor = NumericProperty(-1)  # fator de descida
 
     def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores
-        factor = abs(int(value))
+
+        def safe_cast(val, to_type, default=None):
+            try:
+                return to_type(val)
+
+            except (ValueError, TypeError):
+                return default
+
+        factor = safe_cast(value, int, 0)
 
         if factor == 0:
             if direction:
@@ -30,8 +38,10 @@ class UpDown(Widget):
             else:
                 self.down_factor = 0
                 self.down_factor = -1
-        
+
         else:
+            factor = abs(factor)
+
             if direction:
                 self.up_factor = 0
                 self.up_factor = factor
