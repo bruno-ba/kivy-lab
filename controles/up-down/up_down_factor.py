@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import kivy
 from kivy.app import App
 from kivy.properties import NumericProperty
@@ -13,32 +11,37 @@ Window.clearcolor = [0, 0, .2, 1]
 
 
 class UpDown(Widget):
-    current = NumericProperty(0)
-    factor_up = NumericProperty(10)
-    factor_down = NumericProperty(-10)
+    """
+    simples contador que adiciona um fator para incremento e outro fator para decremento, podendo ser alterado pelas
+    caixas de texto
+    """
+    current_value = NumericProperty(0)  # valor atual do contador
+    up_factor = NumericProperty(1)  # fator de subida
+    down_factor = NumericProperty(-1)  # fator de descida
 
-    @staticmethod
-    def get_valid_factor(value):
-        try:
-            var = int(value)
-            return var
-        except ValueError:
-            return 0
+    def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores
+        factor = abs(int(value))
 
-    def change_factor_up(self, value):
-        self.factor_up = UpDown.get_valid_factor(value)
+        if factor == 0:
+            if direction:
+                self.up_factor = 0
+                self.up_factor = 1
 
-    def increment_current_up(self):
-        self.current += self.factor_up
+            else:
+                self.down_factor = 0
+                self.down_factor = -1
+        
+        else:
+            if direction:
+                self.up_factor = 0
+                self.up_factor = factor
 
-    def change_factor_down(self, value):
-        self.factor_down = UpDown.get_valid_factor(value)
+            else:
+                self.down_factor = 0
+                self.down_factor = factor * -1
 
-    def increment_current_down(self):
-        self.current += self.factor_down
-
-    def command(self):
-        pass
+    def increment_current_value(self, direction: bool) -> None:  # incrementa ou decrementa o valor corrente
+        self.current_value += self.up_factor if direction else self.down_factor
 
 
 code = """
@@ -46,17 +49,19 @@ code = """
     orientation: 'vertical'
     command_btn: None
     command_txt: None
-    factor: 0
+    command_arg : None
+    factor: None
     Button:
         text: str(root.factor)
-        on_press: root.command_btn()
+        on_press: root.command_btn(root.command_arg)
     TextInput:
         size_hint_y: .5
         text: str(root.factor)
         input_filter: 'int'
         multiline: False
-        on_text_validate: root.command_txt(self.text)
-    
+        on_text_validate: root.command_txt(self.text, root.command_arg)
+        on_focus: root.command_txt(self.text, root.command_arg)
+
 <UpDown@Widget>:
     BoxLayout:
         orientation:'vertical'
@@ -65,21 +70,22 @@ code = """
            
         Label:
             size_hint_y: .2
-            text: str(root.current)
+            text: str(root.current_value)
             
         BoxLayout:
             orientation: 'horizontal'
                 
             FactorButton:
-                factor: root.factor_down
-                command_btn: root.increment_current_down
-                command_txt: root.change_factor_down
+                command_btn: root.increment_current_value
+                command_txt: root.set_factor
+                command_arg: False
+                factor: root.down_factor
                 
             FactorButton:
-                factor:root.factor_up
-                command_btn: root.increment_current_up
-                command_txt: root.change_factor_up
-                
+                command_btn: root.increment_current_value
+                command_txt: root.set_factor
+                command_arg: True
+                factor: root.up_factor
                 
 UpDown:
 """
