@@ -16,7 +16,7 @@ class UpDown(Widget):
     simples contador que adiciona um fator para incremento e outro fator para decremento, podendo ser alterado pelas
     caixas de texto
     """
-    down_factor_regex = re.compile(r'^(-)?([1-9])+0*$')  # aceita inteiros e com ou sem sinal negativo
+    down_factor_regex = re.compile(r'^(-)?\d+$')  # aceita inteiros e com ou sem sinal negativo
     up_factor_regex = re.compile(r'\d+')  # aceita inteiros
     current_value = NumericProperty(0)  # valor atual do contador
     up_factor = NumericProperty(1)  # fator de subida
@@ -24,31 +24,57 @@ class UpDown(Widget):
     up_lock = BooleanProperty(False)  # aciona o bloqueio do botão up
     down_lock = BooleanProperty(False)  # aciona o bloqueio do botão down
 
-    def set_factor(self, value: str, direction: bool) -> None:  # configura valores para os fatores up e down
-
-        if direction:
-            self.up_lock = not self.up_lock
-            up_mo = UpDown.up_factor_regex.search(value)
-            self.up_factor = 0
-
-            if up_mo:
-                uf = int(up_mo.group())
-                self.up_factor = 1 if uf <= 0 else uf
-
-            else:
+    def set_factor(self, command: bool, args: tuple) -> None:  # configura valores para os fatores up e down
+        def restart_factor():  # reseta os fatores para os valores iniciais
+            if command:
+                self.up_factor = 0
                 self.up_factor = 1
+            else:
+                self.down_factor = 0
+                self.down_factor = -1
+
+        value = args[0].text  # Argumento passado pelo evento on_focus -> identificando o elemento
+        focus = args[1]  # Argumento passado pelo evento on_focus -> identificando o estado do focus
+
+        if command:  # identifica qual elemento, se é um FactorButton UP ou FactorButton Down up= True; down = False
+            self.up_lock = focus  # bloqueia o botão se o textinput 'UP'correspondente pegar o focus
+
+            if not self.up_lock:  # só executa se o textinput 'UP' perder o focus
+                up_mo = UpDown.up_factor_regex.search(value)  # verifica se é um dígito válído segundo a regex
+
+                if up_mo:
+                    up_fac = int(up_mo.group())
+
+                    if up_fac <= 0:
+                        restart_factor()
+
+                    else:
+                        self.up_factor = up_fac
+
+                else:
+                    restart_factor()
 
         else:
-            self.down_lock = not self.down_lock
-            down_mo = UpDown.down_factor_regex.search(value)
-            self.down_factor = 0
+            self.down_lock = focus
 
-            if down_mo:
-                df = int(down_mo.group())
-                self.down_factor = df if df < 0 else df * -1
+            if not self.down_lock:
+                down_mo = UpDown.down_factor_regex.search(value)
 
-            else:
-                self.down_factor = -1
+                if down_mo:
+                    dw_fac = int(down_mo.group())
+
+                    if dw_fac == 0:
+                        restart_factor()
+
+                    elif 0 < dw_fac:
+                        self.down_factor = 0
+                        self.down_factor = dw_fac * -1
+
+                    else:
+                        self.down_factor = dw_fac
+
+                else:
+                    restart_factor()
 
     def increment_current_value(self, direction: bool) -> None:  # incrementa ou decrementa o valor corrente
         self.current_value += self.up_factor if direction else self.down_factor
@@ -73,8 +99,7 @@ code = """
         text: str(root.factor)
         input_filter: 'int'
         multiline: False
-        on_text_validate: root.command_txt(self.text, root.command_arg)
-        on_focus: root.command_txt(self.text, root.command_arg)
+        on_focus: root.command_txt(root.command_arg, args)
 
 <UpDown@Widget>:
     BoxLayout:
