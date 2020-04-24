@@ -8,6 +8,42 @@ coerce_regex = re.compile(r'^(-)?\d+$')
 
 
 class UpDownFactorCore(EventDispatcher):
+    """
+    Classe que contém a parte lógica do customwidget 'UpDownFactor'
+
+    Propriedades:
+    current_value = valor atual.
+    before_value = valor anterior
+    factor_pos = fator positivo para o incremento
+    factor_neg = fator negativo para o decremento
+    factor_current = fator para definir o valor atual
+
+    Métodos:
+    update_factor_pos(self, value):
+        função que recebe um valor de texto redefine o valor de update_factor_pos.
+            - define 1 para zeros e txt inválidos
+            - define txts de números negativos invertendo-os para o seu número positivo
+
+    update_factor_neg(self, value):
+         função que recebe um valor de texto e redefine o valor de update_factor_neg.
+                - define -1 para zeros e txt inválidos
+                - define txts de números positivo invertendo-os para o seu número negativos
+
+    update_factor_current(self, value):
+        função que recebe um valor de texto e redefine o valor de factor_current.
+                    - define para zero para txt inválidos
+
+
+    increase_current_value(self):
+        função que incrementa o valor de current_value.
+
+    decrease_current_value(self):
+        função que decrementa o valor de current_value.
+
+    set_current_value(self):
+        função que define valor para current_value.
+
+    """
     current_value = NumericProperty(0)
     before_value = NumericProperty(0)
     factor_pos = NumericProperty(1)
@@ -47,9 +83,6 @@ class UpDownFactorCore(EventDispatcher):
 
             elif abs(num) != num:
                 return -1
-
-            else:
-                raise ValueError(f'\nerror <- num: {num}, not valid')
 
         coerced_value = coerce_signal
         is_coerced = True
