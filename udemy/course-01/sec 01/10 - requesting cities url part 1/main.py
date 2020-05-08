@@ -1,17 +1,22 @@
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.network.urlrequest import UrlRequest
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from kivy.uix.recycleview import RecycleView
+"""
+https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=
+"""
 
+import requests
 
 class AddLocationForm(BoxLayout):
     search_input = ObjectProperty()
 
     def search_location(self):
+        req = requests.get('http://api.openweathermap.org/data/2.5/forecast/daily?id=524901&appid=c68fb2b42d84462c55e23e13714ef21f&lang={pt}')
 
-        print(f'your location {self.search_input.text}')
-
+        print(req.text)
 
 root_kv = """
 <AddLocationForm>:
